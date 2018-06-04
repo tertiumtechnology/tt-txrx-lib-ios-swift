@@ -131,7 +131,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                                                    withRxUUID: "3664D14A-08CB-4465-A98A-EBF84F29E943",
                                                    withTxUUID: "F3774638-1164-49BC-8F22-0AC34292C217",
                                                    withCommandEnd: TERTIUM_COMMAND_END_CRLF,
-                                                   withMaxPacketSize: 20))
+                                                   withMaxPacketSize: 128))
         
         // Initialize Ble API
         _centralManager = CBCentralManager(delegate: self, queue: _dispatchQueue)
