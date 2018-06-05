@@ -28,19 +28,19 @@ import UIKit
 /// NOTE: Each device has its own particular characteristics
 public struct TxRxDeviceProfile {
     /// The Service UUID of the Tertium BLE Device
-    let serviceUUID: String
+    public let serviceUUID: String
     
     /// The UUID of the receive characteristic of Tertium BLE Device
-    let rxUUID: String
+    public let rxUUID: String
     
     /// The UUID of the send characteristic of Tertium BLE Device
-    let txUUID: String
+    public let txUUID: String
     
     /// The terminator of the Tertium BLE Device. Tells when a command is finished
-    let commandEnd: String
+    public let commandEnd: String
     
     /// The maximum number of bytes this device class can receive in a single write statement
-    var maxSendPacketSize: Int
+    public var maxSendPacketSize: Int
     
     init(inServiceUUID: String, withRxUUID inRxUUID: String, withTxUUID inTxUUID: String, withCommandEnd inCommandEnd: String, withMaxPacketSize inMaxPacketSize: Int) {
         
