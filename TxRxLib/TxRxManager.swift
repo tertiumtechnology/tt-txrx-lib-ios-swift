@@ -643,13 +643,13 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
         // Verify what we have received
         var text: String
         
-        print("watchDogTimerTickReceivingData\n")
+        //print("watchDogTimerTickReceivingData\n")
         
         // Verify terminator is ok, otherwise we may haven't received a whole response and there has been a receive error or receive timed out
         text = String(data: device.receivedData, encoding: String.Encoding.ascii) ?? ""
         if isTerminatorOK(device: device, text: text) {
             // REMOVE
-            print("COMMAND ANSWER RECEIVED, TERMINATOR OK")
+            //print("COMMAND ANSWER RECEIVED, TERMINATOR OK")
             
             //
             device.waitingAnswer = false
@@ -665,7 +665,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
             }
         } else {
             // REMOVE
-            print("COMMAND ANSWER RECEIVED BUT TERMINATOR NOT OK. DATALEN: ", device.receivedData.count," DATA: ", String(data: device.receivedData, encoding: .ascii)!)
+            //print("COMMAND ANSWER RECEIVED BUT TERMINATOR NOT OK. DATALEN: ", device.receivedData.count," DATA: ", String(data: device.receivedData, encoding: .ascii)!)
             
             //
             device.waitingAnswer = false
@@ -709,13 +709,13 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
                     let data: Data = Data(value)
                     
                     //
-                    print("didUpdateValueForCharacteristic, data received: ", String(data: data, encoding: .ascii)!)
+                    //print("didUpdateValueForCharacteristic, data received: ", String(data: data, encoding: .ascii)!)
                     
                     //
                     device.receivedData.append(data)
                     
                     //
-                    print("didUpdateValueForCharacteristic, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
+                    //print("didUpdateValueForCharacteristic, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
                     
                     if device.watchDogTimer == nil {
                         // Passive receive
