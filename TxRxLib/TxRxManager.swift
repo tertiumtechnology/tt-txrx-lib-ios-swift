@@ -51,7 +51,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     private var _callbackQueue: DispatchQueue
     
     /// Delegate for scanning devices. Delegate methods will be called on device events (refer to TxRxDeviceScanProtocol.swift)
-    var _delegate: TxRxDeviceScanProtocol?
+    public var _delegate: TxRxDeviceScanProtocol?
     
     /// Property telling if the class is currently in scanning devices phase
     public internal(set) var _isScanning = false
