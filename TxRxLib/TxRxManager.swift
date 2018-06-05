@@ -665,7 +665,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             }
         } else {
             // REMOVE
-            print("COMMAND ANSWER RECEIVED BUT TERMINATOR NOT OK. DATALEN: ", device.receivedData.count," DATA: ", String(data: device.receivedData, encoding: .ascii) as String!)
+            print("COMMAND ANSWER RECEIVED BUT TERMINATOR NOT OK. DATALEN: ", device.receivedData.count," DATA: ", String(data: device.receivedData, encoding: .ascii)!)
             
             //
             device.waitingAnswer = false
@@ -709,13 +709,13 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     let data: Data = Data(value)
                     
                     //
-                    print("didUpdateValueForCharacteristic, data received: ", String(data: data, encoding: .ascii) as String!)
+                    print("didUpdateValueForCharacteristic, data received: ", String(data: data, encoding: .ascii)!)
                     
                     //
                     device.receivedData.append(data)
                     
                     //
-                    print("didUpdateValueForCharacteristic, data so far: ", String(data: device.receivedData, encoding: .ascii) as String!)
+                    print("didUpdateValueForCharacteristic, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
                     
                     if device.watchDogTimer == nil {
                         // Passive receive
