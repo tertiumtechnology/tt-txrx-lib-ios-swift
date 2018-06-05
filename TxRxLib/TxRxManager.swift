@@ -105,7 +105,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     /// NOTE: CLASS Method
     ///
     /// - returns: The singleton instance of TxRxManager class
-    class func getInstance() -> TxRxManager {
+    public class func getInstance() -> TxRxManager {
         return _sharedInstance;
     }
     
@@ -151,7 +151,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     /// Begins scanning of BLE devices
     ///
     /// NOTE: You cannot connect, send data nor receive data from devices when in scan mode
-    func startScan() {
+    public func startScan() {
         // Verify BlueTooth is powered on
         guard _blueToothPoweredOn == true else {
             sendBlueToothNotReadyOrLost()
@@ -216,7 +216,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     /// stopScan - Ends the scan of BLE devices
     ///
     /// NOTE: After scan ends you can connect to found devices
-    func stopScan() {
+    public func stopScan() {
         // Verify BlueTooth is powered on
         guard _blueToothPoweredOn == true else {
             sendBlueToothNotReadyOrLost()
@@ -248,7 +248,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     /// NOTE: TxRxManager library will connect ONLY to Tertium BLE devices (service UUID and characteristic UUID will be matched)
     ///
     /// - parameter device: the TxRxDevice device to connect to, MUST be non null
-    func connectDevice(device: TxRxDevice) {
+    public func connectDevice(device: TxRxDevice) {
         // Verify BlueTooth is powered on
         guard _blueToothPoweredOn == true else {
             sendBlueToothNotReadyOrLost()
@@ -453,7 +453,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     ///
     /// - parameter device: the device to send the data (must be connected first!)
     /// - parameter data: Data class with contents of data to send
-    func sendData(device: TxRxDevice, data: Data) {
+    public func sendData(device: TxRxDevice, data: Data) {
         // Verify BlueTooth is powered on
         guard _blueToothPoweredOn == true else {
             sendBlueToothNotReadyOrLost()
@@ -736,7 +736,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     /// Disconnect a previously connected device
     ///
     /// - parameter device: The device to disconnect, MUST be non null
-    func disconnectDevice(device: TxRxDevice) {
+    public func disconnectDevice(device: TxRxDevice) {
         // Verify BlueTooth is powered on
         guard _blueToothPoweredOn == true else {
             sendBlueToothNotReadyOrLost()
@@ -1051,7 +1051,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     ///
     /// - parameter device: the device name
     /// - returns: the device instance, if found, otherwise nil
-    func deviceFromDeviceName(name: String) -> TxRxDevice? {
+    public func deviceFromDeviceName(name: String) -> TxRxDevice? {
         for device in _scannedDevices {
             if device.name.caseInsensitiveCompare(name) == ComparisonResult.orderedSame {
                 return device
@@ -1065,7 +1065,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     ///
     /// - parameter device: the device instance
     /// - returns: the device name
-    func getDeviceName(device: TxRxDevice) -> String {
+    public func getDeviceName(device: TxRxDevice) -> String {
         return device.name;
     }
     
@@ -1075,7 +1075,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     ///
     /// - parameter device: the device indexed name
     /// - returns: the device instance, if found, otherwise nil
-    func deviceFromIndexedName(name: String) -> TxRxDevice? {
+    public func deviceFromIndexedName(name: String) -> TxRxDevice? {
         for device in _scannedDevices {
             if device.indexedName.caseInsensitiveCompare(name) == ComparisonResult.orderedSame {
                 return device
@@ -1089,12 +1089,12 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     ///
     /// - parameter device: the device to get indexed name from
     /// - returns: the device instance, if found, otherwise nil
-    func getDeviceIndexedName(device: TxRxDevice) -> String {
+    public func getDeviceIndexedName(device: TxRxDevice) -> String {
         return device.indexedName
     }
     
     /// Resets timeout values to default values
-    func setTimeOutDefaults() {
+    public func setTimeOutDefaults() {
         _connectTimeout = 20.0
         _receiveFirstPacketTimeout = 1.5
         _receivePacketsTimeout = 0.2
@@ -1105,7 +1105,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     ///
     /// - parameter timeOutType: the timeout event
     /// - returns: the event timeout value, in MILLISECONDS
-    func getTimeOutValue(timeOutType: String) -> UInt32 {
+    public func getTimeOutValue(timeOutType: String) -> UInt32 {
         switch (timeOutType) {
             case TxRxManagerTimeouts.S_TERTIUM_TIMEOUT_CONNECT:
                 return UInt32(_connectTimeout * 1000.0)
@@ -1128,7 +1128,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     ///
     /// - parameter timeOutValue: the timeout value, in MILLISECONDS
     /// - parameter timeOutType: the timeout event
-    func setTimeOutValue(timeOutValue: UInt32, timeOutType: String) {
+    public func setTimeOutValue(timeOutValue: UInt32, timeOutType: String) {
         switch (timeOutType) {
             case TxRxManagerTimeouts.S_TERTIUM_TIMEOUT_CONNECT:
                 _connectTimeout = Double(timeOutValue) / 1000.0
