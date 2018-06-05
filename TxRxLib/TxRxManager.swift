@@ -34,7 +34,7 @@ import Foundation
 /// NOTE: Implements CBCentralManagerDelegate and CBPeripheralDelegate protocols
 ///
 /// Methods are ordered chronologically
-class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     let TERTIUM_COMMAND_END_CRLF = "\r\n"
     let TERTIUM_COMMAND_END_CR = "\r"
     let TERITUM_COMMAND_END_LF = "\n"
@@ -137,7 +137,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         _centralManager = CBCentralManager(delegate: self, queue: _dispatchQueue)
     }
     
-    internal func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
             case .unknown, .resetting, .unsupported, .unauthorized, .poweredOff:
                 masterCleanUp()
@@ -179,7 +179,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
     
-    internal func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+    public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
         //
         for device in _scannedDevices {
@@ -286,7 +286,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         _centralManager.connect(device.cbPeripheral, options: nil)
     }
     
-    internal func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    public func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
         var device: TxRxDevice?
         
         // Search for the TxRxDevice class instance by the CoreBlueTooth peripheral instance
@@ -325,7 +325,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         sendDeviceConnectError(device: device, errorCode: TxRxManagerErrors.ErrorCodes.ERROR_DEVICE_CONNECT_TIMED_OUT, errorText:  TxRxManagerErrors.S_ERROR_DEVICE_CONNECT_TIMED_OUT)
     }
     
-    internal func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         var device: TxRxDevice?
         
         // Search for the TxRxDevice class instance by the CoreBlueTooth peripheral instance
@@ -358,7 +358,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         peripheral.discoverServices(nil)
     }
     
-    internal func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         var device: TxRxDevice?
         var tertiumService: CBService?
         
@@ -408,7 +408,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
     
-    internal func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         var device: TxRxDevice?
         //var maxWriteLen: Int
         
@@ -601,7 +601,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         sendDeviceWriteError(device: device, errorCode: TxRxManagerErrors.ErrorCodes.ERROR_DEVICE_SENDING_DATA_TIMEOUT, errorText: TxRxManagerErrors.S_ERROR_DEVICE_SENDING_DATA_TIMEOUT)
     }
     
-    internal func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         var device: TxRxDevice?
         
         device = deviceFromConnectedPeripheral(peripheral)
@@ -675,7 +675,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
     
-    internal func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 		var device: TxRxDevice?
         
 		device = deviceFromConnectedPeripheral(peripheral)
@@ -788,7 +788,7 @@ class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         sendDeviceConnectError(device: device, errorCode: TxRxManagerErrors.ErrorCodes.ERROR_DEVICE_DISCONNECT_TIMED_OUT, errorText: TxRxManagerErrors.S_ERROR_DEVICE_DISCONNECT_TIMED_OUT)
     }
     
-    internal func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         var device: TxRxDevice?
         
         device = deviceFromKnownPeripheral(peripheral)

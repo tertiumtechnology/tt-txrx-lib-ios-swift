@@ -24,7 +24,7 @@
 import UIKit
 
 /// Defines the methods that will be called on Tertium BLE device events
-protocol TxRxDeviceDataProtocol {
+public protocol TxRxDeviceDataProtocol {
     /// Informs delegate an error while connecting device happened
     ///
     /// - parameter device: The TxRxDevice on which the error occoured

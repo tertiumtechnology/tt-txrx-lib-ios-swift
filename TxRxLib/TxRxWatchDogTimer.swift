@@ -25,7 +25,7 @@ import UIKit
 import Foundation
 
 /// Implements a WatchDog timer to make sure communication which Teritum BLE Devices happen in a timely fashion
-class TxRxWatchDogTimer: NSObject {
+public class TxRxWatchDogTimer: NSObject {
     /// The device handled by this WatchDog timer
     let _device: TxRxDevice
     
@@ -54,7 +54,7 @@ class TxRxWatchDogTimer: NSObject {
         return TxRxWatchDogTimer(device: withDevice, phase: inPhase, timeInterval: withTimeInterval, targetFunc: withTargetFunc)
     }
     
-    init(device: TxRxDevice, phase: TxRxManagerPhase, timeInterval: TimeInterval, targetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
+    public init(device: TxRxDevice, phase: TxRxManagerPhase, timeInterval: TimeInterval, targetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
         _device = device
         _phase = phase
         _interval = timeInterval

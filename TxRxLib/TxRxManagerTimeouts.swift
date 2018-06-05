@@ -23,9 +23,9 @@
  */
 import Foundation
 
-class TxRxManagerTimeouts {
-    static let S_TERTIUM_TIMEOUT_CONNECT = "tmConnect"
-    static let S_TERITUM_TIMEOUT_RECEIVE_FIRST_PACKET = "tmReceiveFirstPacket"
-    static let S_TERTIUM_TIMEOUT_RECEIVE_PACKETS = "tmReceivePackets"
-    static let S_TERTIUM_TIMEOUT_SEND_PACKET = "tmSendPackets"
+public class TxRxManagerTimeouts {
+    public static let S_TERTIUM_TIMEOUT_CONNECT = "tmConnect"
+    public static let S_TERITUM_TIMEOUT_RECEIVE_FIRST_PACKET = "tmReceiveFirstPacket"
+    public static let S_TERTIUM_TIMEOUT_RECEIVE_PACKETS = "tmReceivePackets"
+    public static let S_TERTIUM_TIMEOUT_SEND_PACKET = "tmSendPackets"
 }

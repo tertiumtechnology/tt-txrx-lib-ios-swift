@@ -24,7 +24,7 @@
 import Foundation
 
 /// TxRxDeviceManager phases, states in which phase is the TxRxDevice
-enum TxRxManagerPhase: Int {
+public enum TxRxManagerPhase: Int {
     case PHASE_CONNECTING = 1
     case PHASE_DISCONNECTING
     case PHASE_SENDING_DATA

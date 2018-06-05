@@ -25,7 +25,7 @@ import UIKit
 import CoreBluetooth
 
 /// Implements an instance of Tertium BLE device
-class TxRxDevice: NSObject {
+public class TxRxDevice: NSObject {
     /// This device's delegate. Delegate will receive data exchange information specified in TxRxDeviceDataProtocol
     public var delegate: TxRxDeviceDataProtocol? = nil
     

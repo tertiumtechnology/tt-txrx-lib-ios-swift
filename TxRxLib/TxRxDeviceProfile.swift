@@ -26,7 +26,7 @@ import UIKit
 /// A structure describing a Tertium bluetooth device
 ///
 /// NOTE: Each device has its own particular characteristics
-struct TxRxDeviceProfile {
+public struct TxRxDeviceProfile {
     /// The Service UUID of the Tertium BLE Device
     let serviceUUID: String
     

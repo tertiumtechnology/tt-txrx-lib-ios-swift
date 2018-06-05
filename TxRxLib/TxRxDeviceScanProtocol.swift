@@ -24,7 +24,7 @@
 import UIKit
 
 /// Defines the methods that will be called while scanning for Tertium BLE devices
-protocol TxRxDeviceScanProtocol {
+public protocol TxRxDeviceScanProtocol {
     ///
     func deviceScanBegan()
     
