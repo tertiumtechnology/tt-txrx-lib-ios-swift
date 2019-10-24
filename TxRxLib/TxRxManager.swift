@@ -931,7 +931,7 @@ public class TxRxManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelega
     
     /// Safely remove a device from a collection
     private func removeDeviceFromCollection(collection: inout [TxRxDevice], device: TxRxDevice) {
-        if let idx = collection.index(of: device) {
+        if let idx = collection.firstIndex(of: device) {
             collection.remove(at: idx)
         }
     }
