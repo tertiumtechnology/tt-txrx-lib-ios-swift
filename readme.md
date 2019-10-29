@@ -1,11 +1,11 @@
 # tt-txrx-lib-ios-swift
-iOS Objective-Swift TxRx lowlevel library for Tertium rfid devices
+iOS Swift 5 TxRx lowlevel library for Tertium rfid devices
 
 ## License
 The library is released under the MIT license. Please see the `LICENSE` file.
 
 ## Requirements
-Xcode 9+
+Xcode 11.1+
 
 ## Installation
 To download full source code for TxRxLibrary files follow these steps:
