@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Tertium Technology.
+ * Copyright 2017-2021 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  */
 import UIKit
 
-public class TxRxManagerErrors {
+public class TxRxDeviceManagerErrors {
     public enum ErrorCodes: Int {
         case ERROR_BLUETOOTH_NOT_READY_OR_LOST
         case ERROR_UNABLE_TO_SCAN_BLUETOOTH_DISABLED
@@ -44,9 +44,16 @@ public class TxRxManagerErrors {
         case ERROR_DEVICE_SENDING_DATA_TIMEOUT
         case ERROR_DEVICE_WAITING_COMMAND_ANSWER
         case ERROR_DEVICE_RECEIVING_DATA_TIMEOUT
+        case ERROR_DEVICE_ALREADY_SETTING_MODE
         case ERROR_DEVICE_NOT_FOUND
         case ERROR_IOS_ERROR
         case ERROR_INTERNAL_ERROR
+        
+        // to be used with setModeError notification only
+        case ERROR_SET_MODE
+        case ERROR_SET_MODE_BLE_DEVICE_ERROR
+        case ERROR_SET_MODE_INVALID_CHARACTERISTIC
+        case ERROR_SET_MODE_OPERATION_IN_PROGRESS
     }
     
     public static let S_TERTIUM_TXRX_ERROR_DOMAIN = "Tertium TxRx BLE device library"
@@ -64,6 +71,7 @@ public class TxRxManagerErrors {
     public static let S_ERROR_ALREADY_DISCONNECTING = "Already trying to disconnect device!"
     public static let S_ERROR_DEVICE_NOT_CONNECTED = "Error, device not connected!"
     public static let S_ERROR_DEVICE_NOT_SENDING_DATA = "Error, data send hasn't been commenced!"
+    public static let S_ERROR_DEVICE_ALREADY_SETTING_MODE = "Error, already trying to change operational mode!"
     public static let S_ERROR_DEVICE_SENDING_DATA_ALREADY = "Error, already trying to send data to device!"
     public static let S_ERROR_DEVICE_SENDING_DATA_PARAMETER_ERROR = "One or more parameters are wrong!"
     public static let S_ERROR_DEVICE_SENDING_DATA_TIMEOUT = "Timeout while sending data to device!"

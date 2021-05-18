@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Tertium Technology.
+ * Copyright 2017-2021 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 import Foundation
 
 /// TxRxDeviceManager phases, states in which phase is the TxRxDevice
-public enum TxRxManagerPhase: Int {
+public enum TxRxDeviceManagerPhase: Int {
     case PHASE_CONNECTING = 1
     case PHASE_DISCONNECTING
     case PHASE_SENDING_DATA

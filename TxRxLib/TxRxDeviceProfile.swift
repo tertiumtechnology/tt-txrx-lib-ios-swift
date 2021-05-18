@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Tertium Technology.
+ * Copyright 2017-2021 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,27 +27,43 @@ import UIKit
 ///
 /// NOTE: Each device has its own particular characteristics
 public struct TxRxDeviceProfile {
+    public enum TerminatorType: String {
+        case NONE = ""
+        case CR = "\r"
+        case LF = "\n"
+        case CRLF = "\r\n"
+        case ZERO = "\0"
+    }
+    
     /// The Service UUID of the Tertium BLE Device
-    public let serviceUUID: String
+    public let txRxServiceUUID: String
     
-    /// The UUID of the receive characteristic of Tertium BLE Device
-    public let rxUUID: String
+    /// write characteristic
+    public let txCharacteristicUUID: String
+
+    ///  read characteristic
+    public let rxCharacteristicUUID: String
     
-    /// The UUID of the send characteristic of Tertium BLE Device
-    public let txUUID: String
+    /// setmode characteristic
+    public let setModeCharacteristicUUID: String
     
     /// The terminator of the Tertium BLE Device. Tells when a command is finished
     public let commandEnd: String
     
-    /// The maximum number of bytes this device class can receive in a single write statement
-    public var maxSendPacketSize: Int
+    /// The maximum number of bytes this device class can receive in a single read statement
+    public var rxPacketSize: Int
+
+    /// The maximum number of bytes this device class can send in a single write statement
+    public var txPacketSize: Int
     
-    init(inServiceUUID: String, withRxUUID inRxUUID: String, withTxUUID inTxUUID: String, withCommandEnd inCommandEnd: String, withMaxPacketSize inMaxPacketSize: Int) {
+    init(inServiceUUID: String, withRxUUID inRxUUID: String, withTxUUID inTxUUID: String, withSetModeUUID setModeUUID: String, withCommandEnd inCommandEnd: String, withRxPacketSize inRxPacketSize: Int, withTxPacketSize inTxPacketSize: Int) {
         
-        serviceUUID = inServiceUUID
-        rxUUID = inRxUUID
-        txUUID = inTxUUID
+        txRxServiceUUID = inServiceUUID
+        rxCharacteristicUUID = inRxUUID
+        txCharacteristicUUID = inTxUUID
+        setModeCharacteristicUUID = setModeUUID
         commandEnd = inCommandEnd
-        maxSendPacketSize = inMaxPacketSize
+        rxPacketSize = inRxPacketSize
+        txPacketSize = inTxPacketSize
     }
 }

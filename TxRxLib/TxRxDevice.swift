@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Tertium Technology.
+ * Copyright 2017-2021 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,9 @@ public class TxRxDevice: NSObject {
     /// Reference to CoreBluetooth CBCharacteristic class instance. Holds TRANSMIT device information
     public internal(set) var txChar: CBCharacteristic? = nil
     
+    /// Reference to CoreBluetooth CBCharacteristic class instance. Holds TRANSMIT device information
+    public internal(set) var setModeChar: CBCharacteristic? = nil
+
     /// This device's profile. Please refer to TxRxDeviceProfile class for details
     public internal(set) var deviceProfile: TxRxDeviceProfile? = nil
     
@@ -55,7 +58,13 @@ public class TxRxDevice: NSObject {
     
     /// If device is waiting a command answer in [timeout] time
     public internal(set) var waitingAnswer = false;
-    
+
+    /// Tells if we are changing operation mode
+    public internal(set) var settingMode = false;
+
+    /// Tells which operational mode are we in now
+    public internal(set) var currentOperationalMode: UInt = 0;
+
     /// The instace of TxRxWatchDogTimer class handling the timeouts of this TxRxDevice for a particular phase
     public internal(set) var watchDogTimer: TxRxWatchDogTimer? = nil
     
@@ -73,6 +82,9 @@ public class TxRxDevice: NSObject {
 
     /// The data and data description and states TxRxManager's sendData:device:data: method attaches to the TxRxDevice when sending data to a Tertium Device
     public internal(set) var deviceDescription: String = ""
+
+    //
+    public internal(set) var connectedProfile: TxRxDeviceProfile?
     
     /// A Data class instance hodling the bytes received from the Tertium BLE device
     ///
@@ -88,7 +100,7 @@ public class TxRxDevice: NSObject {
     /// - parameter inPhase: The phase in which the TxRxDevice is into
     /// - parameter withTimeInterval: The timeout value in seconds (double)
     /// - parameter withTargetFunc: the method to call when timer interval elapses
-    internal func scheduleWatchdogTimer(inPhase: TxRxManagerPhase, withTimeInterval: TimeInterval, withTargetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
+    internal func scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase, withTimeInterval: TimeInterval, withTargetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
         invalidateWatchDogTimer()
         watchDogTimer = TxRxWatchDogTimer.scheduledTimer(withDevice: self, inPhase: inPhase, withTimeInterval: withTimeInterval, withTargetFunc: withTargetFunc)
     }

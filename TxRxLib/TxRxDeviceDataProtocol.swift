@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Tertium Technology.
+ * Copyright 2017-2021 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,38 +25,30 @@ import UIKit
 
 /// Defines the methods that will be called on Tertium BLE device events
 public protocol TxRxDeviceDataProtocol {
+    /// Informs delegate a device has been connected
+    ///
+    /// - parameter device: The TxRxDevice on which the error occoured
+    func deviceConnected(device: TxRxDevice)
+    
+    /// Informs delegate a device has been successfully disconnected
+    /// - parameter device: The TxRxDevice disconnected
+    func deviceDisconnected(device: TxRxDevice)
+    
     /// Informs delegate an error while connecting device happened
     ///
     /// - parameter device: The TxRxDevice on which the error occoured
     /// - parameter error: An NSError class instance describing the error
     func deviceConnectError(device: TxRxDevice, error: NSError)
     
-    /// Informs delegate a device has been connected
-    ///
-    /// - parameter device: The TxRxDevice on which the error occoured
-    func deviceConnected(device: TxRxDevice)
-    
     /// Informs a connected device is ready to operate and has been identified as a Tertium BLE device
     ///
     /// - parameter device: The TxRxDevice on which the error occoured
     func deviceReady(device: TxRxDevice)
-    
-    /// Informs delegate there has been an error sending data to device
+
+    /// Informs a connected device can also set operational mode
     ///
     /// - parameter device: The TxRxDevice on which the error occoured
-    /// - parameter error: An NSError class instance describing the error
-    func deviceWriteError(device: TxRxDevice, error: NSError)
-    
-    /// Informs delegate the last sendData operation has succeeded
-    ///
-    /// - parameter device: The TxRxDevice which successfully received the data
-    func sentData(device: TxRxDevice)
-    
-    /// Informs delegate there has been an error receiving data from device
-    ///
-    /// - parameter device: The TxRxDevice on which the error occoured
-    /// - parameter error: An NSError class instance describing the error
-    func deviceReadError(device: TxRxDevice, error: NSError)
+    func setModeCharacteristicDiscovered(device: TxRxDevice)
     
     /// Informs delegate a Tertium BLE device has sent data
     ///
@@ -65,10 +57,33 @@ public protocol TxRxDeviceDataProtocol {
     /// - parameter device: The TxRxDevice which sent the data
     /// - parameter data: the data received from the device (usually ASCII bytes)
     func receivedData(device: TxRxDevice, data: Data)
+
+    /// Informs delegate the last sendData operation has succeeded
+    ///
+    /// - parameter device: The TxRxDevice which successfully received the data
+    func sentData(device: TxRxDevice)
     
-    /// Informs delegate a device has been successfully disconnected
-    /// - parameter device: The TxRxDevice disconnected
-    func deviceDisconnected(device: TxRxDevice)
+    /// Informs delegate the last setMode operation has succeeded
+    ///
+    /// - parameter device: The TxRxDevice which successfully switched operational mode
+    func hasSetMode(device: TxRxDevice, operationalMode: UInt)
+    
+    /// Informs delegate the last setMode operation has succeeded
+    ///
+    /// - parameter device: The TxRxDevice which successfully switched operational mode
+    func setModeError(device: TxRxDevice, errorCode: Int)
+    
+    /// Informs delegate there has been an error receiving data from device
+    ///
+    /// - parameter device: The TxRxDevice on which the error occoured
+    /// - parameter error: An NSError class instance describing the error
+    func deviceReadError(device: TxRxDevice, error: NSError)
+    
+    /// Informs delegate there has been an error sending data to device
+    ///
+    /// - parameter device: The TxRxDevice on which the error occoured
+    /// - parameter error: An NSError class instance describing the error
+    func deviceWriteError(device: TxRxDevice, error: NSError)
     
     /// Informs delegate a device critical error happened. NO further interaction with this TxRxDevice class should be done
     /// - parameter device: The TxRxDevice on which the error occoured

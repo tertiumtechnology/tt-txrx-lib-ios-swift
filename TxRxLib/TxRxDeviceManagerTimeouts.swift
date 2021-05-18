@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Tertium Technology.
+ * Copyright 2017-2021 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  */
 import Foundation
 
-public class TxRxManagerTimeouts {
+public class TxRxDeviceManagerTimeouts {
     public static let S_TERTIUM_TIMEOUT_CONNECT = "tmConnect"
     public static let S_TERITUM_TIMEOUT_RECEIVE_FIRST_PACKET = "tmReceiveFirstPacket"
     public static let S_TERTIUM_TIMEOUT_RECEIVE_PACKETS = "tmReceivePackets"

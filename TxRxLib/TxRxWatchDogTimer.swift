@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017 Tertium Technology.
+ * Copyright 2017-2021 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@ public class TxRxWatchDogTimer: NSObject {
     let _device: TxRxDevice
     
     /// The phase in which the device is (connecting, connected, writing to, receiving from, disconnecting, etc)
-    let _phase: TxRxManagerPhase
+    let _phase: TxRxDeviceManagerPhase
     
     /// The timer's interval. Maxium time the device has to answer to a commands
     let _interval: Double
@@ -50,11 +50,11 @@ public class TxRxWatchDogTimer: NSObject {
     /// - parameter withTimeInterval: The interval after which the timer fires
     /// - parameter withTargetFunc: the function to invoke when timer fires
     /// - returns: A newly created instance of TxRxWatchDogTimer
-    internal class func scheduledTimer(withDevice: TxRxDevice, inPhase: TxRxManagerPhase, withTimeInterval: TimeInterval, withTargetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) -> TxRxWatchDogTimer {
+    internal class func scheduledTimer(withDevice: TxRxDevice, inPhase: TxRxDeviceManagerPhase, withTimeInterval: TimeInterval, withTargetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) -> TxRxWatchDogTimer {
         return TxRxWatchDogTimer(device: withDevice, phase: inPhase, timeInterval: withTimeInterval, targetFunc: withTargetFunc)
     }
     
-    public init(device: TxRxDevice, phase: TxRxManagerPhase, timeInterval: TimeInterval, targetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
+    public init(device: TxRxDevice, phase: TxRxDeviceManagerPhase, timeInterval: TimeInterval, targetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
         _device = device
         _phase = phase
         _interval = timeInterval
