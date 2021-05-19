@@ -688,7 +688,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                     self.deviceSendDataPiece(device)
                 }
             } else if characteristic == device.setModeChar {
-                // cazzo
+                // nothing to do here
             } else {
                 print("Error! Unexpected write on characteristic \(characteristic)")
             }
