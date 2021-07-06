@@ -30,4 +30,6 @@ public enum TxRxDeviceManagerPhase: Int {
     case PHASE_SENDING_DATA
     case PHASE_WAITING_SEND_ACK
     case PHASE_RECEIVING_DATA
+    
+    case PHASE_RECEIVING_EVENT_DATA
 }

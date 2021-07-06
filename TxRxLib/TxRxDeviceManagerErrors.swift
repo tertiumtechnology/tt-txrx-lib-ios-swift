@@ -44,6 +44,7 @@ public class TxRxDeviceManagerErrors {
         case ERROR_DEVICE_SENDING_DATA_TIMEOUT
         case ERROR_DEVICE_WAITING_COMMAND_ANSWER
         case ERROR_DEVICE_RECEIVING_DATA_TIMEOUT
+        case ERROR_DEVICE_RECEIVING_EVENT_DATA_TIMEOUT
         case ERROR_DEVICE_ALREADY_SETTING_MODE
         case ERROR_DEVICE_NOT_FOUND
         case ERROR_IOS_ERROR
@@ -77,6 +78,7 @@ public class TxRxDeviceManagerErrors {
     public static let S_ERROR_DEVICE_SENDING_DATA_TIMEOUT = "Timeout while sending data to device!"
     public static let S_ERROR_DEVICE_WAITING_COMMAND_ANSWER = "Device is waiting an answer to a previously issued command !"
     public static let S_ERROR_DEVICE_RECEIVING_DATA_TIMEOUT = "Error, timeout while receiving data!"
+    public static let S_ERROR_DEVICE_RECEIVING_EVENT_DATA_TIMEOUT = "Error, timeout while receiving event data!"
     public static let S_ERROR_DEVICE_NOT_FOUND = "Device not found in internal data structures!"
     public static let S_ERROR_INTERNAL_ERROR = "Unspecified internal error!"
 }

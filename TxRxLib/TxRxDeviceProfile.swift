@@ -47,6 +47,9 @@ public struct TxRxDeviceProfile {
     /// setmode characteristic
     public let setModeCharacteristicUUID: String
     
+    /// event characteristic
+    public let eventCharacteristicUUID: String
+
     /// The terminator of the Tertium BLE Device. Tells when a command is finished
     public let commandEnd: String
     
@@ -56,12 +59,13 @@ public struct TxRxDeviceProfile {
     /// The maximum number of bytes this device class can send in a single write statement
     public var txPacketSize: Int
     
-    init(inServiceUUID: String, withRxUUID inRxUUID: String, withTxUUID inTxUUID: String, withSetModeUUID setModeUUID: String, withCommandEnd inCommandEnd: String, withRxPacketSize inRxPacketSize: Int, withTxPacketSize inTxPacketSize: Int) {
-        
+    init(inServiceUUID: String, withRxUUID inRxUUID: String, withTxUUID inTxUUID: String, withSetModeUUID inSetModeUUID: String, withEventUUID inEventUUID: String, withCommandEnd inCommandEnd: String, withRxPacketSize inRxPacketSize: Int, withTxPacketSize inTxPacketSize: Int)
+    {
         txRxServiceUUID = inServiceUUID
         rxCharacteristicUUID = inRxUUID
         txCharacteristicUUID = inTxUUID
-        setModeCharacteristicUUID = setModeUUID
+        setModeCharacteristicUUID = inSetModeUUID
+        eventCharacteristicUUID = inEventUUID
         commandEnd = inCommandEnd
         rxPacketSize = inRxPacketSize
         txPacketSize = inTxPacketSize

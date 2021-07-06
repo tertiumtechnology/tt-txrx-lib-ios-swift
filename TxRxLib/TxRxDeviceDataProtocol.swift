@@ -73,6 +73,11 @@ public protocol TxRxDeviceDataProtocol {
     /// - parameter device: The TxRxDevice which successfully switched operational mode
     func setModeError(device: TxRxDevice, errorCode: Int)
     
+    /// Informs delegate we received event data
+    ///
+    /// - parameter device: The TxRxDevice which successfully switched operational mode
+    func receivedEventData(device: TxRxDevice, data: Data)
+    
     /// Informs delegate there has been an error receiving data from device
     ///
     /// - parameter device: The TxRxDevice on which the error occoured

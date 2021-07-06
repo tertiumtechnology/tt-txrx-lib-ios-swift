@@ -47,6 +47,9 @@ public class TxRxDevice: NSObject {
     /// Reference to CoreBluetooth CBCharacteristic class instance. Holds TRANSMIT device information
     public internal(set) var setModeChar: CBCharacteristic? = nil
 
+    /// Reference to CoreBluetooth CBCharacteristic class instance. Holds EVENT device information
+    public internal(set) var eventChar: CBCharacteristic? = nil
+    
     /// This device's profile. Please refer to TxRxDeviceProfile class for details
     public internal(set) var deviceProfile: TxRxDeviceProfile? = nil
     
@@ -68,21 +71,24 @@ public class TxRxDevice: NSObject {
     /// The instace of TxRxWatchDogTimer class handling the timeouts of this TxRxDevice for a particular phase
     public internal(set) var watchDogTimer: TxRxWatchDogTimer? = nil
     
+    /// The instace of TxRxWatchDogTimer class handling the timeouts of this TxRxDevice for a particular phase
+    public internal(set) var eventWatchdogTimer: TxRxWatchDogTimer? = nil
+
     /// The data and data description and states TxRxManager's sendData:device:data: method attaches to the TxRxDevice when sending data to a Tertium Device
     public internal(set) var bytesToSend: Int = 0
 
     /// The data and data description and states TxRxManager's sendData:device:data: method attaches to the TxRxDevice when sending data to a Tertium Device
     public internal(set) var bytesSent: Int = 0
-
+    
     /// The data and data description and states TxRxManager's sendData:device:data: method attaches to the TxRxDevice when sending data to a Tertium Device
     public internal(set) var totalBytesSent: Int = 0
-
+    
     /// The data and data description and states TxRxManager's sendData:device:data: method attaches to the TxRxDevice when sending data to a Tertium Device
     public internal(set) var dataToSend: Data? = nil
-
+    
     /// The data and data description and states TxRxManager's sendData:device:data: method attaches to the TxRxDevice when sending data to a Tertium Device
     public internal(set) var deviceDescription: String = ""
-
+    
     //
     public internal(set) var connectedProfile: TxRxDeviceProfile?
     
@@ -90,6 +96,9 @@ public class TxRxDevice: NSObject {
     ///
     /// NOTE: Commands may NOT be received in a single transfer. Data is accumulated by TxRxManager on CoreBluetooth callbacks.
     public internal(set) var receivedData: Data = Data()
+    
+    /// Event data accumulator for this device
+    public var eventData: Data = Data()
     
     internal init(CBPeripheral: CBPeripheral) {
         cbPeripheral = CBPeripheral
@@ -103,6 +112,16 @@ public class TxRxDevice: NSObject {
     internal func scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase, withTimeInterval: TimeInterval, withTargetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
         invalidateWatchDogTimer()
         watchDogTimer = TxRxWatchDogTimer.scheduledTimer(withDevice: self, inPhase: inPhase, withTimeInterval: withTimeInterval, withTargetFunc: withTargetFunc)
+    }
+    
+    /// Proxy utility method to schedule a watchdog timer. Invalidates previous timer and creates a new instance
+    ///
+    /// - parameter inPhase: The phase in which the TxRxDevice is into
+    /// - parameter withTimeInterval: The timeout value in seconds (double)
+    /// - parameter withTargetFunc: the method to call when timer interval elapses
+    internal func scheduleEventWatchdogTimer(inPhase: TxRxDeviceManagerPhase, withTimeInterval: TimeInterval, withTargetFunc: @escaping (TxRxWatchDogTimer, TxRxDevice) -> ()) {
+        invalidateEventWatchDogTimer()
+        eventWatchdogTimer = TxRxWatchDogTimer.scheduledTimer(withDevice: self, inPhase: inPhase, withTimeInterval: withTimeInterval, withTargetFunc: withTargetFunc)
     }
     
     /// Method to associate a Data buffer to the device. Also prepares length variables
@@ -129,12 +148,22 @@ public class TxRxDevice: NSObject {
         waitingAnswer = false
         deviceProfile = nil
         resetReceivedData()
+        invalidateWatchDogTimer()
+        invalidateEventWatchDogTimer()
     }
     
     /// Invalidates the current device's WatchDog timer
     internal func invalidateWatchDogTimer() {
         if watchDogTimer != nil {
             watchDogTimer?.stop()
+            watchDogTimer = nil
+        }
+    }
+    
+    internal func invalidateEventWatchDogTimer() {
+        if eventWatchdogTimer != nil {
+            eventWatchdogTimer?.stop()
+            eventWatchdogTimer = nil
         }
     }
 }

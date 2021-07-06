@@ -122,6 +122,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                                    withRxUUID: "f3770002-1164-49bc-8f22-0ac34292c217",
                                                    withTxUUID: "f3770003-1164-49bc-8f22-0ac34292c217",
                                                    withSetModeUUID: "",
+                                                   withEventUUID: "",//f3770004-1164-49bc-8f22-0ac34292c217
                                                    withCommandEnd: TxRxDeviceProfile.TerminatorType.CRLF.rawValue,
                                                    withRxPacketSize: 128,
                                                    withTxPacketSize: 20))
@@ -131,6 +132,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                                    withRxUUID: "1cce1ea8-bd34-4813-a00a-c76e028fadcb",
                                                    withTxUUID: "cacc07ff-ffff-4c48-8fae-a9ef71b75e26",
                                                    withSetModeUUID: "20b9794f-da1a-4d14-8014-a0fb9cefb2f7",
+                                                   withEventUUID: "",
                                                    withCommandEnd: TxRxDeviceProfile.TerminatorType.CRLF.rawValue,
                                                    withRxPacketSize: 15,
                                                    withTxPacketSize: 20))
@@ -140,6 +142,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                                    withRxUUID: "3cc30002-cb91-4947-bd12-80d2f0535a30",
                                                    withTxUUID: "3cc30003-cb91-4947-bd12-80d2f0535a30",
                                                    withSetModeUUID: "",
+                                                   withEventUUID: "3cc30004-cb91-4947-bd12-80d2f0535a30",
                                                    withCommandEnd: TxRxDeviceProfile.TerminatorType.CRLF.rawValue,
                                                    withRxPacketSize: 240,
                                                    withTxPacketSize: 240))
@@ -432,9 +435,11 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         if let device = device, let characteristics = service.characteristics {
             for characteristic: CBCharacteristic in characteristics {
                 if let deviceProfile = device.deviceProfile {
-                    if characteristic.uuid.isEqual(CBUUID(string: deviceProfile.txCharacteristicUUID)) {
+                    if characteristic.uuid.uuidString.caseInsensitiveCompare(deviceProfile.txCharacteristicUUID) == ComparisonResult.orderedSame {
+                        // TX characteristic
                         peripheral.setNotifyValue(true, for: characteristic)
                         device.txChar = characteristic
+                        
                         /*
                             if #available(iOS 9.0, *) {
                                 //print("Peripheral maximumWriteValueLength = \(peripheral.maximumWriteValueLength)")
@@ -444,14 +449,15 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                 //device.deviceProfile?.maxSendPacketSize = maxWriteLen
                             }
                         */
-
+                        
                         //
                         if device.txChar != nil, device.rxChar != nil, let delegate = device.delegate {
                             _callbackQueue.async {
                                 delegate.deviceReady(device: device)
                             }
                         }
-                    } else if characteristic.uuid.isEqual(CBUUID(string: deviceProfile.rxCharacteristicUUID)) {
+                    } else if characteristic.uuid.uuidString.caseInsensitiveCompare(deviceProfile.rxCharacteristicUUID) == ComparisonResult.orderedSame {
+                        // RX characteristic
                         device.rxChar = characteristic
                         
                         //
@@ -460,7 +466,8 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                 delegate.deviceReady(device: device)
                             }
                         }
-                    } else if deviceProfile.setModeCharacteristicUUID.count != 0 && characteristic.uuid.isEqual(CBUUID(string: deviceProfile.setModeCharacteristicUUID)) {
+                    } else if characteristic.uuid.uuidString.caseInsensitiveCompare(deviceProfile.setModeCharacteristicUUID) == ComparisonResult.orderedSame {
+                        // SetMode characteristic
                         peripheral.setNotifyValue(true, for: characteristic)
                         device.setModeChar = characteristic
                         
@@ -469,6 +476,9 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                 delegate.setModeCharacteristicDiscovered(device: device)
                             }
                         }
+                    } else if characteristic.uuid.uuidString.caseInsensitiveCompare(deviceProfile.eventCharacteristicUUID) == ComparisonResult.orderedSame {
+                        // Event characteristic
+                        device.eventChar = characteristic
                     }
                 }
                 
@@ -736,6 +746,31 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         }
     }
     
+    /// Watchdog for timeouts for receiving data from event characteristic
+    ///
+    /// - parameter timer: the timer instance which handled the timeout
+    /// - parameter device: the device on which the read operation timed out
+    private func watchDogTimerTickReceivingEventData(_ timer: TxRxWatchDogTimer, device: TxRxDevice) {
+        //
+        device.eventWatchdogTimer?.stop()
+        device.eventWatchdogTimer = nil
+        
+        //
+        if device.eventData.count != 0 {
+            // if we received data send it to the delegate
+            let dataCopy = Data(device.eventData)
+            device.eventData = Data()
+            
+            // Notify delegate of the received event data
+            if let delegate = device.delegate {
+                delegate.receivedEventData(device: device, data: dataCopy)
+            }
+        } else {
+            // We didn't receive any data despite the watchdog, send error to the delegate
+            sendDeviceReadError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_DEVICE_RECEIVING_DATA_TIMEOUT, errorText: TxRxDeviceManagerErrors.S_ERROR_DEVICE_RECEIVING_DATA_TIMEOUT)
+        }
+    }
+    
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 		var device: TxRxDevice?
         
@@ -791,6 +826,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                     }
                 }
             } else if characteristic == device.setModeChar {
+                // Received mode change notify
                 if device.settingMode == false {
                     print("Unexpected mode change happened!")
                 }
@@ -818,10 +854,21 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                         }
                     }
                 }
+            } else if characteristic == device.eventChar {
+                // We received data from event characteristic
+                if let value = characteristic.value {
+                    if device.eventWatchdogTimer == nil {
+                        // Check if we have setup a watchdog timer for event characteristic, when the watchdog
+                        // fires we'll send accumulated event data to the delegate
+                        device.scheduleEventWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_RECEIVING_EVENT_DATA, withTimeInterval: _receivePacketsTimeout, withTargetFunc: self.watchDogTimerTickReceivingEventData)
+                    }
+                    
+                    device.eventData.append(value)
+                }
             }
         }
 	}
-
+    
     public func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateForCharacteristicFor characteristic: CBCharacteristic, error: Error?) {
         var device: TxRxDevice?
         
