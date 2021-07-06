@@ -478,6 +478,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                         }
                     } else if characteristic.uuid.uuidString.caseInsensitiveCompare(deviceProfile.eventCharacteristicUUID) == ComparisonResult.orderedSame {
                         // Event characteristic
+                        peripheral.setNotifyValue(true, for: characteristic)
                         device.eventChar = characteristic
                     }
                 }
