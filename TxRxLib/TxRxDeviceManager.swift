@@ -160,7 +160,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             case .poweredOn:
                 _blueToothPoweredOn = true
         @unknown default:
-                print("Unknown CBCentralManager state value, shutting bluetooth down")
+                //print("Unknown CBCentralManager state value, shutting bluetooth down")
                 _blueToothPoweredOn = true
         }
     }
@@ -290,14 +290,14 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             return
         }
         
+        // Reset device states
+        device.resetStates()
+
         // Create connect watchdog timer
         device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_CONNECTING, withTimeInterval: _connectTimeout, withTargetFunc: self.watchDogTimerForConnectTick)
         
         // Device is added to the list of connecting devices
         _connectingDevices.append(device)
-        
-        // Reset device states
-        device.resetStates()
         
         // Inform CoreBluetooth we want to connect the specified peripheral. Answer will come via a callback
         _centralManager.connect(device.cbPeripheral, options: nil)
@@ -391,9 +391,9 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             if let delegate = device?.delegate {
                 let nsError = NSError(domain: TxRxDeviceManagerErrors.S_TERTIUM_TXRX_ERROR_DOMAIN, code: TxRxDeviceManagerErrors.ErrorCodes.ERROR_IOS_ERROR.rawValue, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
                 
-                _callbackQueue.async{
+                //_callbackQueue.async{
                     delegate.deviceConnectError(device: device!, error: nsError)
-                }
+                //}
             }
             
             return
@@ -510,6 +510,9 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
     /// - parameter device: the device to send the data (must be connected first!)
     /// - parameter data: Data class with contents of data to send
     public func sendData(device: TxRxDevice, data: Data) {
+        //
+        //print("sendData()\n");
+        
         // Verify BlueTooth is powered on
         guard _blueToothPoweredOn == true else {
             sendBlueToothNotReadyOrLost()
@@ -538,15 +541,17 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         guard device.sendingData == false else {
             sendDeviceWriteError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_DEVICE_SENDING_DATA_ALREADY, errorText: TxRxDeviceManagerErrors.S_ERROR_DEVICE_SENDING_DATA_ALREADY)
 
-            // REMOVE
+            //
             //print("Unable to issue sendData, sending data already")
             return
         }
         
         guard device.waitingAnswer == false else {
+            //
+            //print("sendDeviceWriteError()\n");
             sendDeviceWriteError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_DEVICE_WAITING_COMMAND_ANSWER, errorText: TxRxDeviceManagerErrors.S_ERROR_DEVICE_WAITING_COMMAND_ANSWER)
-
-            // REMOVE
+            
+            //
             //print("Unable to issue sendData, waiting for answer")
             return
         }
@@ -560,7 +565,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                 device.setDataToSend(data: dataToSend)
                 device.sendingData = true
                 
-                // REMOVE
+                //
                 //print("Issuing senddata")
 
                 // Commence data sending to device
@@ -578,6 +583,8 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         var packet: Data?
         var packetSize: Int
         
+        //
+        //print("deviceSendDataPiece\n");
         guard _connectedDevices.contains(where: { $0 === device}) else {
             sendDeviceWriteError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_DEVICE_NOT_CONNECTED, errorText: TxRxDeviceManagerErrors.S_ERROR_DEVICE_NOT_CONNECTED)
             return;
@@ -586,7 +593,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         guard device.sendingData == true else {
             sendInternalError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_DEVICE_NOT_SENDING_DATA, errorText: TxRxDeviceManagerErrors.S_ERROR_DEVICE_NOT_SENDING_DATA)
 
-            // REMOVE
+            //
             //print("Unable to issue sendData, sending data already")
             return;
         }
@@ -621,15 +628,17 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                             timeOut = _receivePacketsTimeout
                         }
                         
-                        // REMOVE
+                        //
                         //print("sending data piece")
-
+                        
                         device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_WAITING_SEND_ACK, withTimeInterval: timeOut, withTargetFunc: self.watchDogTimerTickReceivingSendAck)
                     }
                 }
             }
-        } else {
-            // REMOVE
+        }
+        
+        if device.totalBytesSent >= device.bytesToSend {
+            //
             //print("sent all data, waiting answer")
             
             // All buffer contents have been sent
@@ -638,6 +647,9 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             
             // Enable recieve watchdog timer. Waiting for response from Tertium BLE device
             device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_RECEIVING_DATA, withTimeInterval: _receiveFirstPacketTimeout, withTargetFunc: self.watchDogTimerTickReceivingData)
+            
+            //
+            //print("device.waitingAnswer = true\n");
             
             //
             device.waitingAnswer = true
@@ -650,8 +662,8 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
     /// - parameter timer: the TxRxWatchDogTimer instance which handled the timeout
     /// - parameter device: the device to which connect failed
     private func watchDogTimerTickReceivingSendAck(timer: TxRxWatchDogTimer, device: TxRxDevice) {
-        // REMOVE
-        //print("SENDACK TIMEOUT")
+        //
+        //print("watchDogTimerTickReceivingSendAck()")
         
         device.sendingData = false
         if device.settingMode {
@@ -668,6 +680,9 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
     public func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         var device: TxRxDevice?
         
+        //
+        //print("---- didWriteValueFor characteristic() ----")
+        
         device = deviceFromConnectedPeripheral(peripheral)
         if let device = device {
             if let error = error {
@@ -676,12 +691,12 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                 device.sendingData = false
                 let nsError = NSError(domain: TxRxDeviceManagerErrors.S_TERTIUM_TXRX_ERROR_DOMAIN, code: TxRxDeviceManagerErrors.ErrorCodes.ERROR_IOS_ERROR.rawValue, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
                 if let delegate = device.delegate {
-                    _callbackQueue.async {
+                    //_callbackQueue.async {
                         delegate.deviceWriteError(device: device, error: nsError)
-                    }
+                    //}
                 }
                 
-                // REMOVE
+                //
                 //print("SENDACK ERROR: " + error.localizedDescription)
                 
                 // There has been an error, invalidate WatchDog timer
@@ -695,13 +710,13 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             if characteristic == device.rxChar {
                 // Update device's total bytes sent and try to send more data
                 device.totalBytesSent += device.bytesSent
-                _dispatchQueue.async {
+                //_dispatchQueue.async {
                     self.deviceSendDataPiece(device)
-                }
+                //}
             } else if characteristic == device.setModeChar {
                 // nothing to do here
             } else {
-                print("Error! Unexpected write on characteristic \(characteristic)")
+                //print("Error! Unexpected write on characteristic \(characteristic)")
             }
         }
     }
@@ -714,7 +729,8 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         // Verify what we have received data
         //var text: String
         
-        //print("watchDogTimerTickReceivingData\n")
+        //
+        //print("watchDogTimerTickReceivingData()\n")
         
         // Verify terminator is ok, otherwise we may haven't received a whole response and there has been a receive error or receive timed out
         //text = String(data: device.receivedData, encoding: String.Encoding.ascii) ?? ""
@@ -724,9 +740,15 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             //print("COMMAND ANSWER RECEIVED, TERMINATOR OK")
             
             //
+            //print("watchDogTimerTickReceivingData, device.waitingAnswer = false\n");
+            
+            //
             device.waitingAnswer = false
             
             if let delegate = device.delegate {
+                //
+                //print("watchDogTimerTickReceivingData, active receive\n");
+
                 let dispatchData = Data(device.receivedData)
                 device.resetReceivedData()
                 _callbackQueue.async {
@@ -736,9 +758,12 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                 device.resetReceivedData()
             }
         } else {
-            // REMOVE
+            //
             //print("COMMAND ANSWER RECEIVED BUT TERMINATOR NOT OK. DATALEN: ", device.receivedData.count," DATA: ", String(data: device.receivedData, encoding: .ascii)!)
             
+            //
+            //print("watchDogTimerTickReceivingData, device.waitingAnswer = false\n");
+
             //
             device.waitingAnswer = false
             
@@ -778,14 +803,14 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
 		device = deviceFromConnectedPeripheral(peripheral)
         if let device = device {
             //
+            //print("didUpdateValueFor characteristic, device.waitingAnswer = false")
+            
+            //
             device.waitingAnswer = false
             
-            // REMOVE
-            //print("didUpdateValueFor, receiving data")
-
             if let error = error {
-                // REMOVE
-                //print("didUpdateValueFor error: ", error.localizedDescription)
+                //
+                //print("didUpdateValueFor characteristic, error: ", error.localizedDescription)
                 
                 // There has been an error receiving data
                 if let delegate = device.delegate {
@@ -806,15 +831,18 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                     let data: Data = Data(value)
                     
                     //
-                    //print("didUpdateValueForCharacteristic, data received: ", String(data: data, encoding: .ascii)!)
+                    //print("didUpdateValueFor characteristic, data received: ", String(data: data, encoding: .ascii)!)
                     
                     //
                     device.receivedData.append(data)
                     
                     //
-                    //print("didUpdateValueForCharacteristic, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
+                    //print("didUpdateValueFor characteristic, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
                     
                     if device.watchDogTimer == nil {
+                        //
+                        //print("didUpdateValueFor characteristic, passive receive")
+
                         // Passive receive
                         if let delegate = device.delegate {
                             _callbackQueue.async {
@@ -829,7 +857,8 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             } else if characteristic == device.setModeChar {
                 // Received mode change notify
                 if device.settingMode == false {
-                    print("Unexpected mode change happened!")
+                    //
+                    //print("Unexpected mode change happened!")
                 }
                 
                 //
@@ -878,11 +907,11 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             //
             device.waitingAnswer = false
             
-            // REMOVE
+            //
             //print("didUpdateValueFor, receiving data")
 
             if let error = error {
-                // REMOVE
+                //
                 //print("didUpdateNotificationStateFor error: ", error.localizedDescription)
                 
                 // There has been an error receiving data
@@ -913,6 +942,9 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                     //print("didUpdateNotificationStateFor, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
                     
                     if device.watchDogTimer == nil {
+                        //
+                        //print("didUpdateNotificationStateFor, passive receive")
+
                         // Passive receive
                         if let delegate = device.delegate {
                             _callbackQueue.async {
