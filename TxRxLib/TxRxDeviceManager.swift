@@ -107,7 +107,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
     
     let TX_RX_TERTIUM_SERVICEUUID = "f3770001-1164-49bc-8f22-0ac34292c217";
     let TX_RX_ACKME_SERVICEUUID = "175f8f23-a570-49bd-9627-815a6a27de2a";
-    let ZHAGA_SERVICEUUID = "3cc30001-cb91-4947-bd12-80d2f0535a30";
+    let TX_RX_ZHAGA_SERVICEUUID = "3cc30001-cb91-4947-bd12-80d2f0535a30";
     
     override init() {
         _callbackQueue = DispatchQueue.main
@@ -138,7 +138,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                                    withTxPacketSize: 20))
         
         // Zhaga
-        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: ZHAGA_SERVICEUUID,
+        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: TX_RX_ZHAGA_SERVICEUUID,
                                                    withRxUUID: "3cc30002-cb91-4947-bd12-80d2f0535a30",
                                                    withTxUUID: "3cc30003-cb91-4947-bd12-80d2f0535a30",
                                                    withSetModeUUID: "",
@@ -497,7 +497,20 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         if let deviceProfile = device.deviceProfile {
             return TX_RX_ACKME_SERVICEUUID == deviceProfile.txRxServiceUUID
         }
-    
+        
+        return false
+    }
+
+    ///
+    /// Check if the connected device is a TxRxAckme device
+    ///
+    /// - parameter device:the device get information from
+    /// - returns - true if the connected device is a TxRxAckme, false otherwise.
+    public func isTxRxZhaga(device: TxRxDevice) -> Bool {
+        if let deviceProfile = device.deviceProfile {
+            return TX_RX_ZHAGA_SERVICEUUID == deviceProfile.txRxServiceUUID
+        }
+        
         return false
     }
 
