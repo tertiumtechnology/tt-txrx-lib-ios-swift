@@ -105,9 +105,11 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         return _sharedInstance;
     }
     
-    let TX_RX_TERTIUM_SERVICEUUID = "f3770001-1164-49bc-8f22-0ac34292c217";
+    let SENSOR_TERTIUM_SERVICEUUID = "f3770001-1164-49bc-8f22-0ac34292c217";
     let TX_RX_ACKME_SERVICEUUID = "175f8f23-a570-49bd-9627-815a6a27de2a";
-    let TX_RX_ZHAGA_SERVICEUUID = "3cc30001-cb91-4947-bd12-80d2f0535a30";
+    let ZHAGA_SERVICEUUID = "3cc30001-cb91-4947-bd12-80d2f0535a30";
+    let TX_RX_TERTIUM_SERVICEUUID = "d7080001-052c-46c4-9978-c0977bebf328";
+    let ZEBRA_TERTIUM_SERVICEUUID = "c1ff0001-c47e-424d-9495-fb504404b8f5";
     
     override init() {
         _callbackQueue = DispatchQueue.main
@@ -117,17 +119,17 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         //
         setTimeOutDefaults()
         
-        // TxRxTertium
-        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: TX_RX_TERTIUM_SERVICEUUID,
+        // Tertium sensor
+        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: SENSOR_TERTIUM_SERVICEUUID,
                                                    withRxUUID: "f3770002-1164-49bc-8f22-0ac34292c217",
                                                    withTxUUID: "f3770003-1164-49bc-8f22-0ac34292c217",
                                                    withSetModeUUID: "",
-                                                   withEventUUID: "",//f3770004-1164-49bc-8f22-0ac34292c217
+                                                   withEventUUID: "",
                                                    withCommandEnd: TxRxDeviceProfile.TerminatorType.CRLF.rawValue,
-                                                   withRxPacketSize: 128,
-                                                   withTxPacketSize: 20))
+                                                   withRxPacketSize: 240,
+                                                   withTxPacketSize: 240))
         
-        // TxRxAckme
+        // Zentri Ackme
         _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: TX_RX_ACKME_SERVICEUUID,
                                                    withRxUUID: "1cce1ea8-bd34-4813-a00a-c76e028fadcb",
                                                    withTxUUID: "cacc07ff-ffff-4c48-8fae-a9ef71b75e26",
@@ -137,16 +139,36 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                                                    withRxPacketSize: 15,
                                                    withTxPacketSize: 20))
         
-        // Zhaga
-        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: TX_RX_ZHAGA_SERVICEUUID,
+        // Zhaga TxRx
+        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: ZHAGA_SERVICEUUID,
                                                    withRxUUID: "3cc30002-cb91-4947-bd12-80d2f0535a30",
                                                    withTxUUID: "3cc30003-cb91-4947-bd12-80d2f0535a30",
                                                    withSetModeUUID: "",
                                                    withEventUUID: "3cc30004-cb91-4947-bd12-80d2f0535a30",
+                                                   withCommandEnd: TxRxDeviceProfile.TerminatorType.CR.rawValue,
+                                                   withRxPacketSize: 240,
+                                                   withTxPacketSize: 240))
+        
+        // Tertium TxRx
+        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: TX_RX_TERTIUM_SERVICEUUID,
+                                                   withRxUUID: "d7080002-052c-46c4-9978-c0977bebf328",
+                                                   withTxUUID: "d7080003-052c-46c4-9978-c0977bebf328",
+                                                   withSetModeUUID: "",
+                                                   withEventUUID: "",
                                                    withCommandEnd: TxRxDeviceProfile.TerminatorType.CRLF.rawValue,
                                                    withRxPacketSize: 240,
                                                    withTxPacketSize: 240))
         
+        // Tetium-Zebra TxRx
+        _txRxSupportedDevices.append(TxRxDeviceProfile(inServiceUUID: ZEBRA_TERTIUM_SERVICEUUID,
+                                                   withRxUUID: "c1ff0002-c47e-424d-9495-fb504404b8f5",
+                                                   withTxUUID: "c1ff0003-c47e-424d-9495-fb504404b8f5",
+                                                   withSetModeUUID: "",
+                                                   withEventUUID: "",
+                                                   withCommandEnd: TxRxDeviceProfile.TerminatorType.CRLF.rawValue,
+                                                   withRxPacketSize: 240,
+                                                   withTxPacketSize: 240))
+
         // Initialize Ble API
         _centralManager = CBCentralManager(delegate: self, queue: _dispatchQueue)
     }
@@ -508,7 +530,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
     /// - returns - true if the connected device is a TxRxAckme, false otherwise.
     public func isTxRxZhaga(device: TxRxDevice) -> Bool {
         if let deviceProfile = device.deviceProfile {
-            return TX_RX_ZHAGA_SERVICEUUID == deviceProfile.txRxServiceUUID
+            return ZHAGA_SERVICEUUID == deviceProfile.txRxServiceUUID
         }
         
         return false
