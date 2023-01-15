@@ -52,6 +52,7 @@ public class TxRxDeviceManagerErrors {
         
         // to be used with setModeError notification only
         case ERROR_SET_MODE
+        case ERROR_SET_MODE_TIMEOUT
         case ERROR_SET_MODE_BLE_DEVICE_ERROR
         case ERROR_SET_MODE_INVALID_CHARACTERISTIC
         case ERROR_SET_MODE_OPERATION_IN_PROGRESS

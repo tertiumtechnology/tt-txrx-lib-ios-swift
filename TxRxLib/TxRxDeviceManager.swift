@@ -704,7 +704,7 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         if device.settingMode {
             device.settingMode = false
             if let delegate = device.delegate {
-                delegate.setModeError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_SET_MODE.rawValue)
+                delegate.setModeTimeout(device: device)
                 return
             }
         }
@@ -721,14 +721,20 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         device = deviceFromConnectedPeripheral(peripheral)
         if let device = device {
             if let error = error {
-                // There has been a write error
-                device.settingMode = false
-                device.sendingData = false
                 let nsError = NSError(domain: TxRxDeviceManagerErrors.S_TERTIUM_TXRX_ERROR_DOMAIN, code: TxRxDeviceManagerErrors.ErrorCodes.ERROR_IOS_ERROR.rawValue, userInfo: [NSLocalizedDescriptionKey: error.localizedDescription])
+                if (device.settingMode == true) {
+                    device.settingMode = false
+                    if let delegate = device.delegate {
+                        delegate.setModeError(device: device, error: nsError)
+                    }
+                    
+                    return
+                }
+                
+                // There has been a write error
+                device.sendingData = false
                 if let delegate = device.delegate {
-                    //_callbackQueue.async {
-                        delegate.deviceWriteError(device: device, error: nsError)
-                    //}
+                    delegate.deviceWriteError(device: device, error: nsError)
                 }
                 
                 //
@@ -749,7 +755,36 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                     self.deviceSendDataPiece(device)
                 //}
             } else if characteristic == device.setModeChar {
-                // nothing to do here
+                // Received mode change notify
+                if device.settingMode == false {
+                    //
+                    //print("Unexpected mode change happened!")
+                }
+                
+                //
+                //print("Mode change happened")
+                
+                //
+                device.settingMode = false
+                if let value = characteristic.value {
+                    let array = [UInt8](value)
+                    if array.count != 0 {
+                        device.currentOperationalMode = UInt(array[0])
+                        if let delegate = device.delegate {
+                            //_callbackQueue.async {
+                                delegate.hasSetMode(device: device, operationalMode: device.currentOperationalMode)
+                            //}
+                        }
+                    } else {
+                        //print("Error while receiving update value for set mode characteristic, data to string conversion failed")
+                    }
+                } else {
+                    //print("Error while receiving update value for set mode characteristic")
+                    if let delegate = device.delegate {
+                        let nsError = NSError(domain: TxRxDeviceManagerErrors.S_TERTIUM_TXRX_ERROR_DOMAIN, code: TxRxDeviceManagerErrors.ErrorCodes.ERROR_IOS_ERROR.rawValue, userInfo: nil)
+                        delegate.setModeError(device: device, error: nsError)
+                    }
+                }
             } else {
                 //print("Error! Unexpected write on characteristic \(characteristic)")
             }
@@ -782,9 +817,11 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
             
             if let delegate = device.delegate {
                 //
-                //print("watchDogTimerTickReceivingData, active receive\n");
-
+                //print("watchDogTimerTickReceivingData, active receive, resetting accumulated bytes\n");
+                
                 let dispatchData = Data(device.receivedData)
+                //let dataString = String(data: dispatchData, encoding: .ascii)
+                //print(dataString!)
                 device.resetReceivedData()
                 _callbackQueue.async {
                     delegate.receivedData(device: device, data: dispatchData)
@@ -874,51 +911,40 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                     //
                     //print("didUpdateValueFor characteristic, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
                     
+                    if device.settingMode == true {
+                        //print("didUpdateValueFor characteristic, scheduling timer")
+                        
+                        // Schedule a new watchdog timer for receiving data packets
+                        device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_RECEIVING_DATA, withTimeInterval: _receivePacketsTimeout, withTargetFunc: self.watchDogTimerTickReceivingData)
+                        
+                        return
+                    }
+                    
                     if device.watchDogTimer == nil {
+                        // Schedule a new watchdog timer for receiving data packets
+                        device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_RECEIVING_DATA, withTimeInterval: _receivePacketsTimeout, withTargetFunc: self.watchDogTimerTickReceivingData)
+
                         //
                         //print("didUpdateValueFor characteristic, passive receive")
+                        //device.resetReceivedData();
 
+                        /*
                         // Passive receive
                         if let delegate = device.delegate {
                             _callbackQueue.async {
                                 delegate.receivedData(device: device, data: data)
                             }
                         }
+                         */
                     } else {
+                        //print("didUpdateValueFor characteristic, scheduling timer")
+                        
                         // Schedule a new watchdog timer for receiving data packets
                         device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_RECEIVING_DATA, withTimeInterval: _receivePacketsTimeout, withTargetFunc: self.watchDogTimerTickReceivingData)
                     }
                 }
             } else if characteristic == device.setModeChar {
-                // Received mode change notify
-                if device.settingMode == false {
-                    //
-                    //print("Unexpected mode change happened!")
-                }
-                
-                //
-                device.settingMode = false
-                
-                if let value = characteristic.value {
-                    let array = [UInt8](value)
-                    if array.count != 0 {
-                        device.currentOperationalMode = UInt(array[0])
-                        if let delegate = device.delegate {
-                            _callbackQueue.async {
-                                delegate.hasSetMode(device: device, operationalMode: device.currentOperationalMode)
-                            }
-                        }
-                    } else {
-                        //print("Error while receiving update value for set mode characteristic, data to string conversion failed")
-                    }
-                } else {
-                    //print("Error while receiving update value for set mode characteristic")
-                    if let delegate = device.delegate {
-                        _callbackQueue.async {
-                            delegate.setModeError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_SET_MODE.rawValue)
-                        }
-                    }
-                }
+                // Nothing to do here
             } else if characteristic == device.eventChar {
                 // We received data from event characteristic
                 if let value = characteristic.value {
@@ -977,15 +1003,19 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
                     //print("didUpdateNotificationStateFor, data so far: ", String(data: device.receivedData, encoding: .ascii)!)
                     
                     if device.watchDogTimer == nil {
+                        // Schedule a new watchdog timer for receiving data packets
+                        device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_RECEIVING_DATA, withTimeInterval: _receivePacketsTimeout, withTargetFunc: self.watchDogTimerTickReceivingData)
+
                         //
                         //print("didUpdateNotificationStateFor, passive receive")
-
+                        /*
                         // Passive receive
                         if let delegate = device.delegate {
                             _callbackQueue.async {
                                 delegate.receivedData(device: device, data: data)
                             }
                         }
+                         */
                     } else {
                         // Schedule a new watchdog timer for receiving data packets
                         device.scheduleWatchdogTimer(inPhase: TxRxDeviceManagerPhase.PHASE_RECEIVING_DATA, withTimeInterval: _receivePacketsTimeout, withTargetFunc: self.watchDogTimerTickReceivingData)
@@ -1344,6 +1374,8 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
     /// @return true if the operation mode can be set and the SetMode operation was initiated successfully, false
     /// otherwise
     public func setMode(device: TxRxDevice, mode: UInt) {
+        //print("Setting mode")
+        
         // Verify BlueTooth is powered on
         guard _blueToothPoweredOn == true else {
             sendBlueToothNotReadyOrLost()
@@ -1365,12 +1397,13 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         // Verify we have discovered required characteristics
         guard device.setModeChar != nil else {
             if let delegate = device.delegate {
-                delegate.setModeError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_SET_MODE_INVALID_CHARACTERISTIC.rawValue)
+                let nsError = NSError(domain: TxRxDeviceManagerErrors.S_TERTIUM_TXRX_ERROR_DOMAIN, code: TxRxDeviceManagerErrors.ErrorCodes.ERROR_SET_MODE_INVALID_CHARACTERISTIC.rawValue, userInfo: nil)
+                delegate.setModeError(device: device, error: nsError)
             }
             return
         }
         
-        // Verify if we aren't already sending data to the device
+        // Verify we aren't already sending data to the device
         guard device.sendingData == false else {
             sendDeviceWriteError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_DEVICE_SENDING_DATA_ALREADY, errorText: TxRxDeviceManagerErrors.S_ERROR_DEVICE_SENDING_DATA_ALREADY)
 
@@ -1387,7 +1420,8 @@ public class TxRxDeviceManager: NSObject, CBCentralManagerDelegate, CBPeripheral
         // Verify we aren't setting mode already
         guard device.settingMode == false else {
             if let delegate = device.delegate {
-                delegate.setModeError(device: device, errorCode: TxRxDeviceManagerErrors.ErrorCodes.ERROR_SET_MODE_OPERATION_IN_PROGRESS.rawValue)
+                let nsError = NSError(domain: TxRxDeviceManagerErrors.S_TERTIUM_TXRX_ERROR_DOMAIN, code: TxRxDeviceManagerErrors.ErrorCodes.ERROR_SET_MODE_OPERATION_IN_PROGRESS.rawValue, userInfo: nil)
+                delegate.setModeError(device: device, error: nsError)
             }
 
             return

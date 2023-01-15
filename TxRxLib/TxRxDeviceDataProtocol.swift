@@ -71,7 +71,13 @@ public protocol TxRxDeviceDataProtocol {
     /// Informs delegate the last setMode operation has succeeded
     ///
     /// - parameter device: The TxRxDevice which successfully switched operational mode
-    func setModeError(device: TxRxDevice, errorCode: Int)
+    /// - parameter error: An NSError class instance describing the error
+    func setModeError(device: TxRxDevice, error: NSError)
+    
+    /// Informs delegate the last setMode operation has succeeded
+    ///
+    /// - parameter device: The TxRxDevice which successfully switched operational mode
+    func setModeTimeout(device: TxRxDevice)
     
     /// Informs delegate we received event data
     ///
@@ -83,13 +89,23 @@ public protocol TxRxDeviceDataProtocol {
     /// - parameter device: The TxRxDevice on which the error occoured
     /// - parameter error: An NSError class instance describing the error
     func deviceReadError(device: TxRxDevice, error: NSError)
-    
+
+    /// Informs delegate there has been a timeout error receiving data from device
+    ///
+    /// - parameter device: The TxRxDevice on which the error occoured
+    func deviceReadTimeout(device: TxRxDevice)
+
     /// Informs delegate there has been an error sending data to device
     ///
     /// - parameter device: The TxRxDevice on which the error occoured
     /// - parameter error: An NSError class instance describing the error
     func deviceWriteError(device: TxRxDevice, error: NSError)
     
+    /// Informs delegate there has been a timeout  error sending data to device
+    ///
+    /// - parameter device: The TxRxDevice on which the error occoured
+    func deviceWriteTimeout(device: TxRxDevice)
+
     /// Informs delegate a device critical error happened. NO further interaction with this TxRxDevice class should be done
     /// - parameter device: The TxRxDevice on which the error occoured
     /// - parameter error: An NSError class instance describing the error
