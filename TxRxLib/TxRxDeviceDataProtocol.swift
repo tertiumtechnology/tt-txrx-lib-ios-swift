@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2017-2021 Tertium Technology.
+ * Copyright 2017-2023 Tertium Technology.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,13 +68,13 @@ public protocol TxRxDeviceDataProtocol {
     /// - parameter device: The TxRxDevice which successfully switched operational mode
     func hasSetMode(device: TxRxDevice, operationalMode: UInt)
     
-    /// Informs delegate the last setMode operation has succeeded
+    /// Informs delegate the last setMode operation has failed
     ///
-    /// - parameter device: The TxRxDevice which successfully switched operational mode
+    /// - parameter device: The TxRxDevice which failed to switched operational mode
     /// - parameter error: An NSError class instance describing the error
     func setModeError(device: TxRxDevice, error: NSError)
     
-    /// Informs delegate the last setMode operation has succeeded
+    /// Informs delegate the last setMode operation has failed timing out
     ///
     /// - parameter device: The TxRxDevice which successfully switched operational mode
     func setModeTimeout(device: TxRxDevice)
